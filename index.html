@@ -4,51 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Libya Jinn Horror Game</title>
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
     <style>
         body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Creepster', cursive;
-            text-align: center;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-        #game {
-            max-width: 800px;
-            margin: auto;
-        }
-        #scene-image {
-            max-width: 100%;
-            height: auto;
+        #game-container {
             border: 2px solid #8b0000;
         }
-        #scene-text {
-            font-size: 1.2em;
-            margin: 20px 0;
-        }
-        button {
-            background-color: #8b0000;
+        #health-text {
+            position: absolute;
+            top: 10px;
+            left: 10px;
             color: #fff;
-            padding: 10px 20px;
-            margin: 10px;
-            border: none;
-            cursor: pointer;
-            font-family: 'Creepster', cursive;
-            font-size: 1em;
-        }
-        button:hover {
-            background-color: #ff0000;
+            font-family: 'Arial', sans-serif;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
-    <div id="game">
-        <h1>Libya Jinn Horror Game</h1>
-        <img id="scene-image" src="" alt="Scene Image">
-        <p id="scene-text"></p>
-        <div id="choices"></div>
-    </div>
+    <div id="game-container"></div>
     <script src="game.js"></script>
 </body>
 </html>
