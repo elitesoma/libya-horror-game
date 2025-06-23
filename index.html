@@ -3,12 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cheese vs Jinn</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+    <title>Libya Jinn Horror Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Creepster', cursive;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        #game {
+            max-width: 800px;
+            margin: auto;
+        }
+        #scene-image {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #8b0000;
+        }
+        #scene-text {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #8b0000;
+            color: #fff;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Creepster', cursive;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #ff0000;
+        }
+    </style>
 </head>
 <body>
-    <div id="game-container"></div>
-    <script src="sketch.js"></script>
+    <div id="game">
+        <h1>Libya Jinn Horror Game</h1>
+        <img id="scene-image" src="" alt="Scene Image">
+        <p id="scene-text"></p>
+        <div id="choices"></div>
+    </div>
+    <script src="game.js"></script>
 </body>
 </html>
