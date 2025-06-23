@@ -1,94 +1,116 @@
-const scenes = {
-    start: {
-        text: "You arrive in Libya, seeking an ancient artifact in the desert. The wind howls, and you feel an eerie presence watching you...",
-        image: "images/desert.jpg",
-        choices: [
-            { text: "Investigate the strange feeling", next: "investigate" },
-            { text: "Ignore it and press forward", next: "forward" }
-        ]
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    parent: 'game-container',
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 0 },
+            debug: false
+        }
     },
-    investigate: {
-        text: "You look around, heart pounding. Shadows flicker in the dunes. Suddenly, a jinn materializes before you!",
-        image: "images/jinn.jpg",
-        choices: [
-            { text: "Fight the jinn", next: "fight" },
-            { text: "Run away", next: "run" }
-        ]
-    },
-    forward: {
-        text: "You ignore the feeling and continue. The desert grows darker, and whispers surround you. Something is following you...",
-        image: "images/darkdesert.jpg",
-        choices: [
-            { text: "Turn back to confront it", next: "investigate" },
-            { text: "Keep moving", next: "ruins" }
-        ]
-    },
-    fight: {
-        text: "You swing at the jinn with all your might. It shrieks and vanishes, but you feel weaker. The artifact is still out there...",
-        image: "images/fight.jpg",
-        choices: [
-            { text: "Continue your journey", next: "ruins" }
-        ]
-    },
-    run: {
-        text: "You sprint across the dunes, but the jinn's laughter echoes behind you. You stumble into ancient ruins.",
-        image: "images/ruins.jpg",
-        choices: [
-            { text: "Explore the ruins", next: "ruins" },
-            { text: "Hide and wait", next: "hide" }
-        ]
-    },
-    ruins: {
-        text: "The ruins are ancient, filled with strange symbols. A jinn appears, more powerful than before. What do you do?",
-        image: "images/strongjinn.jpg",
-        choices: [
-            { text: "Fight the jinn", next: "finalfight" },
-            { text: "Search for the artifact", next: "artifact" }
-        ]
-    },
-    hide: {
-        text: "You hide in the shadows, but the jinn finds you. Its eyes glow red. Game over.",
-        image: "images/gameover.jpg",
-        choices: []
-    },
-    finalfight: {
-        text: "You battle the jinn fiercely. With a final blow, it dissipates. You find the artifact, but at what cost? You win... for now.",
-        image: "images/victory.jpg",
-        choices: []
-    },
-    artifact: {
-        text: "You find the artifact glowing faintly. As you touch it, the jinn reappears, enraged. Game over.",
-        image: "images/gameover.jpg",
-        choices: []
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
     }
 };
 
-let currentScene = 'start';
+let player, jinns, talismans, cursors, spaceKey, health = 100, healthText;
+const game = new Phaser.Game(config);
 
-function displayScene() {
-    const scene = scenes[currentScene];
-    document.getElementById('scene-text').innerText = scene.text;
-    document.getElementById('scene-image').src = scene.image;
-    const choicesDiv = document.getElementById('choices');
-    choicesDiv.innerHTML = '';
-    scene.choices.forEach(choice => {
-        const button = document.createElement('button');
-        button.innerText = choice.text;
-        button.onclick = () => {
-            currentScene = choice.next;
-            displayScene();
-        };
-        choicesDiv.appendChild(button);
+function preload() {
+    this.load.image('background', 'assets/images/background.jpg');
+    this.load.image('player', 'assets/images/player.png');
+    this.load.image('jinn', 'assets/images/jinn.png');
+    this.load.image('talisman', 'assets/images/talisman.png');
+}
+
+function create() {
+    this.add.image(800, 600, 'background').setOrigin(0.5);
+    this.physics.world.setBounds(0, 0, 1600, 1200);
+    this.cameras.main.setBounds(0, 0, 1600, 1200);
+
+    player = this.physics.add.sprite(400, 300, 'player').setScale(0.5);
+    player.setCollideWorldBounds(true);
+
+    jinns = this.physics.add.group();
+    for (let i = 0; i < 5; i++) {
+        let x = Phaser.Math.Between(100, 1500);
+        let y = Phaser.Math.Between(100, 1100);
+        let jinn = jinns.create(x, y, 'jinn').setScale(0.5);
+        jinn.health = 50;
+        jinn.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-100, 100));
+        jinn.setBounce(1);
+        jinn.setCollideWorldBounds(true);
+    }
+
+    talismans = this.physics.add.group();
+    for (let i = 0; i < 3; i++) {
+        let x = Phaser.Math.Between(100, 1500);
+        let y = Phaser.Math.Between(100, 1100);
+        talismans.create(x, y, 'talisman').setScale(0.5);
+    }
+
+    cursors = this.input.keyboard.addKeys({
+        up: Phaser.Input.Keyboard.KeyCodes.W,
+        left: Phaser.Input.Keyboard.KeyCodes.A,
+        down: Phaser.Input.Keyboard.KeyCodes.S,
+        right: Phaser.Input.Keyboard.KeyCodes.D
     });
-    if (scene.choices.length === 0) {
-        const restartButton = document.createElement('button');
-        restartButton.innerText = 'Restart';
-        restartButton.onclick = () => {
-            currentScene = 'start';
-            displayScene();
-        };
-        choicesDiv.appendChild(restartButton);
+    spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+    this.physics.add.overlap(player, jinns, playerHitJinn, null, this);
+    this.physics.add.overlap(player, talismans, collectTalisman, null, this);
+
+    healthText = this.add.text(10, 10, 'Health: 100', { font: '20px Arial', fill: '#fff' }).setScrollFactor(0);
+
+    this.cameras.main.startFollow(player);
+}
+
+function update() {
+    if (cursors.left.isDown) {
+        player.setVelocityX(-200);
+    } else if (cursors.right.isDown) {
+        player.setVelocityX(200);
+    } else {
+        player.setVelocityX(0);
+    }
+
+    if (cursors.up.isDown) {
+        player.setVelocityY(-200);
+    } else if (cursors.down.isDown) {
+        player.setVelocityY(200);
+    } else {
+        player.setVelocityY(0);
+    }
+
+    if (spaceKey.isDown) {
+        jinns.getChildren().forEach(jinn => {
+            if (Phaser.Math.Distance.Between(player.x, player.y, jinn.x, jinn.y) < 100) {
+                jinn.health -= 10;
+                if (jinn.health <= 0) {
+                    jinn.destroy();
+                }
+            }
+        });
+    }
+
+    if (health <= 0) {
+        this.add.text(400, 300, 'Game Over', { font: '40px Arial', fill: '#ff0000' }).setOrigin(0.5).setScrollFactor(0);
+        this.physics.pause();
     }
 }
 
-displayScene();
+function playerHitJinn(player, jinn) {
+    health -= 10;
+    healthText.setText('Health: ' + health);
+    jinn.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-100, 100));
+}
+
+function collectTalisman(player, talisman) {
+    talisman.destroy();
+    health = Math.min(100, health + 20);
+    healthText.setText('Health: ' + health);
+}
